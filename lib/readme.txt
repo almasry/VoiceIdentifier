@@ -1,0 +1,1 @@
+I like to keep my jars in this folder just as a personal preference. It is important that we don't add them to the repository though, because they take up a lot of space and make commiting/pulling slow. 
