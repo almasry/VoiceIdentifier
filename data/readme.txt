@@ -1,0 +1,1 @@
+This folder should contain our data. Like the lib folder, we shouldn't add the data to the repository. We can use dropbox or Drive to sync the files to some sub-folder in here.
