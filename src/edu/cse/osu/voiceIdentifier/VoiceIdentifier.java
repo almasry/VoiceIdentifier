@@ -1,5 +1,8 @@
 package edu.cse.osu.voiceIdentifier;
 
+import java.awt.Color;
+import java.util.Random;
+
 import javax.swing.JFrame;
 
 import org.jplot2d.element.Axis;
@@ -20,20 +23,31 @@ public class VoiceIdentifier {
 
         // http://www.wavlist.com/movies/317/ofsp-suprman3.wav
 
-        String filename = "data/ofsp-suprman3.wav";
+        String filename = "data/sample-david.wav";
 
         // create a wave object
         Wave wave = new Wave(filename);
         Spectrogram spectrogram = new Spectrogram(wave);
 
-        double[][] freqTimeData = spectrogram.getNormalizedSpectrogramData();
+        double[][] freqTimeData1 = spectrogram.getNormalizedSpectrogramData();
 
-        double[] x = new double[freqTimeData[0].length];
-        for (int i = 0; i < freqTimeData[0].length; i++) {
+        filename = "data/sample-tomas.wav";
+
+        wave = new Wave(filename);
+        spectrogram = new Spectrogram(wave);
+
+        double[][] freqTimeData2 = spectrogram
+                .getNormalizedSpectrogramData();
+
+        double[] x = new double[freqTimeData1[0].length];
+        for (int i = 0; i < freqTimeData1[0].length; i++) {
             x[i] = i;
         }
 
-        plotGraph(x, normalizedSum(freqTimeData));
+        double[][] yData = { normalizedSum(freqTimeData1),
+                normalizedSum(freqTimeData2) };
+
+        plotGraph(x, yData);
 
     }
 
@@ -94,6 +108,52 @@ public class VoiceIdentifier {
 
         plot.addLayer(layer, xAxis.getTickManager().getAxisTransform(), yAxis
                 .getTickManager().getAxisTransform());
+
+        JFrame frame = new JPlot2DFrame(plot);
+        frame.setSize(800, 600);
+        frame.setVisible(true);
+
+    }
+
+    /**
+     * Plot a graph of the data provided with multiple lines
+     *
+     * @param x
+     * @param y
+     */
+    public static void plotGraph(double[] x, double[][] y) {
+
+        ElementFactory ef = ElementFactory.getInstance();
+        Plot plot = ef.createPlot();
+        plot.setPreferredContentSize(800, 600);
+        plot.setSizeMode(new AutoPackSizeMode());
+
+        Title title = ef.createTitle("Intensity vs. Frequency");
+        title.setFontScale(2);
+        plot.addTitle(title);
+
+        Axis xAxis = ef.createAxis();
+        Axis yAxis = ef.createAxis();
+
+        plot.addXAxis(xAxis);
+        plot.addYAxis(yAxis);
+
+        for (double[] row : y) {
+
+            Layer layer = ef.createLayer();
+
+            Random rand = new Random(System.currentTimeMillis());
+
+            XYGraph graph = ef.createXYGraph(x, row);
+
+            graph.setColor(new Color(rand.nextInt(150), rand.nextInt(120), rand
+                    .nextInt(120)));
+
+            layer.addGraph(graph);
+            plot.addLayer(layer, xAxis.getTickManager().getAxisTransform(),
+                    yAxis.getTickManager().getAxisTransform());
+
+        }
 
         JFrame frame = new JPlot2DFrame(plot);
         frame.setSize(800, 600);
