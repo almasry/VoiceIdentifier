@@ -5,6 +5,7 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 
+import org.jplot2d.element.Annotation;
 import org.jplot2d.element.Axis;
 import org.jplot2d.element.ElementFactory;
 import org.jplot2d.element.Layer;
@@ -29,8 +30,9 @@ public class VoiceIdentifier {
             x[i] = i;
         }
 
-        double[][] yData = {getFeatures(new Wave(dataPath+"sample-ben1.wav")),getFeatures(new Wave(dataPath+"sample-ben2.wav")),
-                getFeatures(new Wave(dataPath+"sample-ben3.wav")),getFeatures(new Wave(dataPath+"sample-david.wav"))};
+        double[][] yData = {
+                getFeatures(new Wave(dataPath + "sample-ben2.wav")),
+                getFeatures(new Wave(dataPath + "ben-long.wav")) };
 
         plotGraph(x, yData);
 
@@ -123,6 +125,7 @@ public class VoiceIdentifier {
         plot.addXAxis(xAxis);
         plot.addYAxis(yAxis);
 
+        int i = 0;
         for (double[] row : y) {
 
             Layer layer = ef.createLayer();
@@ -131,12 +134,22 @@ public class VoiceIdentifier {
 
             XYGraph graph = ef.createXYGraph(x, row);
 
-            graph.setColor(new Color(rand.nextInt(150), rand.nextInt(120), rand
-                    .nextInt(120)));
+            Color c = new Color(rand.nextInt(150), rand.nextInt(120),
+                    rand.nextInt(120));
+
+            graph.setColor(c);
 
             layer.addGraph(graph);
             plot.addLayer(layer, xAxis.getTickManager().getAxisTransform(),
                     yAxis.getTickManager().getAxisTransform());
+
+            Annotation ann = ef
+                    .createSymbolAnnotation(x[255], row[255], i + "");
+            ann.setColor(c);
+            ann.setFontSize(30);
+            layer.addAnnotation(ann);
+
+            i++;
 
         }
 
@@ -145,9 +158,8 @@ public class VoiceIdentifier {
         frame.setVisible(true);
 
     }
-    
-    
-    public static double[] getFeatures(Wave w) {    	
+
+    public static double[] getFeatures(Wave w) {
         Spectrogram spec = new Spectrogram(w);
         double[][] freqTimeData = spec.getNormalizedSpectrogramData();
         return normalizedSum(freqTimeData);
