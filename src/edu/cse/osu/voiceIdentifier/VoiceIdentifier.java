@@ -1,10 +1,8 @@
 package edu.cse.osu.voiceIdentifier;
 
 import java.awt.Color;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.JFrame;
@@ -20,7 +18,6 @@ import org.jplot2d.sizing.AutoPackSizeMode;
 import org.jplot2d.swing.JPlot2DFrame;
 
 import com.musicg.wave.Wave;
-import com.musicg.wave.extension.Spectrogram;
 
 public class VoiceIdentifier {
 
@@ -34,47 +31,34 @@ public class VoiceIdentifier {
             x[i] = i;
         }
 
-        double[][] yData = {
-                getFeatures(new Wave(dataPath + "sample-ben1.wav")),
-                getFeatures(new Wave(dataPath + "sample-ben2.wav")),
-                getFeatures(new Wave(dataPath + "sample-ben3.wav")),
-                getFeatures(new Wave(dataPath + "ben-long.wav")),
-                getFeatures(new Wave(dataPath + "sample-david.wav")),
-                getFeatures(new Wave(dataPath + "david-long.wav")) };
+        AudioSample sample1 = new AudioSample(new Wave(dataPath
+                + "sample-ben1.wav"));
+        AudioSample sample2 = new AudioSample(new Wave(dataPath
+                + "sample-ben2.wav"));
+        AudioSample sample3 = new AudioSample(new Wave(dataPath
+                + "ben-long.wav"));
+        AudioSample sample4 = new AudioSample(new Wave(dataPath
+                + "sample-david.wav"));
+        AudioSample sample5 = new AudioSample(new Wave(dataPath
+                + "david-long.wav"));
 
-        String[] classes = { "ben", "ben", "ben", "ben", "david", "david" };
+        ArrayList<DataPoint> pointList = new ArrayList<DataPoint>();
 
-        exportDataFile(yData, classes, new File("data/test.csv"));
+        pointList.add(new DataPoint(sample1.getFeatures(), 0));
+        pointList.add(new DataPoint(sample2.getFeatures(), 0));
+        pointList.add(new DataPoint(sample3.getFeatures(), 0));
+        pointList.add(new DataPoint(sample4.getFeatures(), 1));
+        pointList.add(new DataPoint(sample5.getFeatures(), 1));
 
-        plotGraph(x, yData);
+        DataSet data = new DataSet(pointList);
 
-    }
+        data.exportDataFileWeka(new File("data/wekatest.arff"));
 
-    /**
-     * Takes each row of a 2D array and sums together Divides each array element
-     * by the number of rows
-     *
-     * @param data
-     *            2d array to sum
-     * @return 1d sum of the values in data divided by the length of data
-     */
-    public static double[] normalizedSum(double[][] data) {
-
-        double[] output = new double[data[0].length];
-
-        for (double[] row : data) {
-            for (int i = 0; i < row.length; i++) {
-                output[i] += row[i];
-            }
-        }
-
-        for (int i = 0; i < output.length; i++) {
-            output[i] /= data.length;
-        }
-
-        return output;
+        plotGraph(x, data.getRawData());
 
     }
+
+
 
     /**
      * Plot a graph of the data provided
@@ -171,38 +155,5 @@ public class VoiceIdentifier {
 
     }
 
-    public static double[] getFeatures(Wave w) {
-        Spectrogram spec = new Spectrogram(w);
-        double[][] freqTimeData = spec.getNormalizedSpectrogramData();
-        return normalizedSum(freqTimeData);
-    }
 
-    public static void exportDataFile(double[][] features,
-            String[] classLabels, File outputFile) {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(
-                    outputFile));
-
-            // Add header line
-            for (int i = 0; i < features[0].length; i++) {
-                writer.write("\"" + i + "\",");
-            }
-
-            writer.write("\"classLabel\"\n");
-
-            // write data
-
-            for (int i = 0; i < features.length; i++) {
-                for (int j = 0; j < features[i].length; j++) {
-                    writer.write(features[i][j] + ",");
-                }
-                writer.write(classLabels[i] + "\n");
-            }
-
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
 }
