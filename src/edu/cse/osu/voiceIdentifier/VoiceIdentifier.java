@@ -1,6 +1,10 @@
 package edu.cse.osu.voiceIdentifier;
 
 import java.awt.Color;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
 
 import javax.swing.JFrame;
@@ -31,8 +35,16 @@ public class VoiceIdentifier {
         }
 
         double[][] yData = {
+                getFeatures(new Wave(dataPath + "sample-ben1.wav")),
                 getFeatures(new Wave(dataPath + "sample-ben2.wav")),
-                getFeatures(new Wave(dataPath + "ben-long.wav")) };
+                getFeatures(new Wave(dataPath + "sample-ben3.wav")),
+                getFeatures(new Wave(dataPath + "ben-long.wav")),
+                getFeatures(new Wave(dataPath + "sample-david.wav")),
+                getFeatures(new Wave(dataPath + "david-long.wav")) };
+
+        String[] classes = { "ben", "ben", "ben", "ben", "david", "david" };
+
+        exportDataFile(yData, classes, new File("data/test.csv"));
 
         plotGraph(x, yData);
 
@@ -163,5 +175,34 @@ public class VoiceIdentifier {
         Spectrogram spec = new Spectrogram(w);
         double[][] freqTimeData = spec.getNormalizedSpectrogramData();
         return normalizedSum(freqTimeData);
+    }
+
+    public static void exportDataFile(double[][] features,
+            String[] classLabels, File outputFile) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(
+                    outputFile));
+
+            // Add header line
+            for (int i = 0; i < features[0].length; i++) {
+                writer.write("\"" + i + "\",");
+            }
+
+            writer.write("\"classLabel\"\n");
+
+            // write data
+
+            for (int i = 0; i < features.length; i++) {
+                for (int j = 0; j < features[i].length; j++) {
+                    writer.write(features[i][j] + ",");
+                }
+                writer.write(classLabels[i] + "\n");
+            }
+
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
