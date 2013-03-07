@@ -24,29 +24,13 @@ public class VoiceIdentifier {
         // args[0] should be the path to your data folder
         String dataPath = args[0];
 
-        String filename = dataPath + "sample-david.wav";
-
-        // create a wave object
-        Wave wave = new Wave(filename);
-        Spectrogram spectrogram = new Spectrogram(wave);
-
-        double[][] freqTimeData1 = spectrogram.getNormalizedSpectrogramData();
-
-        filename = dataPath + "sample-tomas.wav";
-
-        wave = new Wave(filename);
-        spectrogram = new Spectrogram(wave);
-
-        double[][] freqTimeData2 = spectrogram
-                .getNormalizedSpectrogramData();
-
-        double[] x = new double[freqTimeData1[0].length];
-        for (int i = 0; i < freqTimeData1[0].length; i++) {
+        double[] x = new double[256];
+        for (int i = 0; i < 256; i++) {
             x[i] = i;
         }
 
-        double[][] yData = { normalizedSum(freqTimeData1),
-                normalizedSum(freqTimeData2) };
+        double[][] yData = {getFeatures(new Wave(dataPath+"sample-ben1.wav")),getFeatures(new Wave(dataPath+"sample-ben2.wav")),
+                getFeatures(new Wave(dataPath+"sample-ben3.wav")),getFeatures(new Wave(dataPath+"sample-david.wav"))};
 
         plotGraph(x, yData);
 
@@ -161,5 +145,11 @@ public class VoiceIdentifier {
         frame.setVisible(true);
 
     }
-
+    
+    
+    public static double[] getFeatures(Wave w) {    	
+        Spectrogram spec = new Spectrogram(w);
+        double[][] freqTimeData = spec.getNormalizedSpectrogramData();
+        return normalizedSum(freqTimeData);
+    }
 }
