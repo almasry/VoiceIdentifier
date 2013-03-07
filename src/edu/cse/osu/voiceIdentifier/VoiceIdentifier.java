@@ -24,8 +24,6 @@ public class VoiceIdentifier {
         // args[0] should be the path to your data folder
         String dataPath = args[0];
 
-        // http://www.wavlist.com/movies/317/ofsp-suprman3.wav
-
         String filename = dataPath + "sample-david.wav";
 
         // create a wave object
