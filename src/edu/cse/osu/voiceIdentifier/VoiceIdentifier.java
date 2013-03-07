@@ -21,9 +21,12 @@ public class VoiceIdentifier {
 
     public static void main(String[] args) {
 
+        // args[0] should be the path to your data folder
+        String dataPath = args[0];
+
         // http://www.wavlist.com/movies/317/ofsp-suprman3.wav
 
-        String filename = "data/sample-david.wav";
+        String filename = dataPath + "sample-david.wav";
 
         // create a wave object
         Wave wave = new Wave(filename);
@@ -31,7 +34,7 @@ public class VoiceIdentifier {
 
         double[][] freqTimeData1 = spectrogram.getNormalizedSpectrogramData();
 
-        filename = "data/sample-tomas.wav";
+        filename = dataPath + "sample-tomas.wav";
 
         wave = new Wave(filename);
         spectrogram = new Spectrogram(wave);
