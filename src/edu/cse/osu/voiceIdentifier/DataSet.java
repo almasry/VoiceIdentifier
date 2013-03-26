@@ -1,10 +1,7 @@
 package edu.cse.osu.voiceIdentifier;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,44 +21,6 @@ public class DataSet implements Iterable<DataPoint> {
         mPoints = pointList;
     }
 
-    public DataSet(File dataFile, File classificationFile) {
-
-        mPoints = new ArrayList<DataPoint>();
-
-        try {
-            BufferedReader valueReader = new BufferedReader(new FileReader(
-                    dataFile));
-            BufferedReader classReader = new BufferedReader(new FileReader(
-                    classificationFile));
-
-            String valueLine = valueReader.readLine();
-            String classLine = classReader.readLine();
-
-            while (valueLine != null) {
-
-                String[] valueStrings = valueLine.trim().split("\\s+");
-
-                double[] values = new double[valueStrings.length];
-                for (int i = 0; i < values.length; i++) {
-                    values[i] = Double.parseDouble(valueStrings[i]);
-                }
-
-                int classValue = Integer.parseInt(classLine.trim());
-
-                mPoints.add(new DataPoint(values, classValue));
-
-                valueLine = valueReader.readLine();
-                classLine = classReader.readLine();
-
-            }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public DataPoint get(int index) {
         return mPoints.get(index);
     }
@@ -71,7 +30,7 @@ public class DataSet implements Iterable<DataPoint> {
     }
 
     @Override
-    public Iterator iterator() {
+    public Iterator<DataPoint> iterator() {
         return mPoints.iterator();
     }
 

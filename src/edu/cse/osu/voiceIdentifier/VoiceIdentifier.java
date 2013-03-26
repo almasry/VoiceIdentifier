@@ -17,8 +17,6 @@ import org.jplot2d.element.XYGraph;
 import org.jplot2d.sizing.AutoPackSizeMode;
 import org.jplot2d.swing.JPlot2DFrame;
 
-import com.musicg.wave.Wave;
-
 public class VoiceIdentifier {
 
     public static void main(String[] args) {
@@ -31,16 +29,11 @@ public class VoiceIdentifier {
             x[i] = i;
         }
 
-        AudioSample sample1 = new AudioSample(new Wave(dataPath
-                + "sample-ben1.wav"));
-        AudioSample sample2 = new AudioSample(new Wave(dataPath
-                + "sample-ben2.wav"));
-        AudioSample sample3 = new AudioSample(new Wave(dataPath
-                + "ben-long.wav"));
-        AudioSample sample4 = new AudioSample(new Wave(dataPath
-                + "sample-david.wav"));
-        AudioSample sample5 = new AudioSample(new Wave(dataPath
-                + "david-long.wav"));
+        AudioSample sample1 = new AudioSample(dataPath + "sample-ben1.wav");
+        AudioSample sample2 = new AudioSample(dataPath + "sample-ben2.wav");
+        AudioSample sample3 = new AudioSample(dataPath + "ben-long.wav");
+        AudioSample sample4 = new AudioSample(dataPath + "sample-david.wav");
+        AudioSample sample5 = new AudioSample(dataPath + "david-long.wav");
 
         ArrayList<DataPoint> pointList = new ArrayList<DataPoint>();
 
@@ -54,11 +47,15 @@ public class VoiceIdentifier {
 
         data.exportDataFileWeka(new File("data/wekatest.arff"));
 
+        System.out.println(sample5.length());
+
+        DataSet splitData = new DataSet(sample5.splitToDataPoints(10.0, 0));
+
         plotGraph(x, data.getRawData());
 
+        plotGraph(x, splitData.getRawData());
+
     }
-
-
 
     /**
      * Plot a graph of the data provided
@@ -154,6 +151,5 @@ public class VoiceIdentifier {
         frame.setVisible(true);
 
     }
-
 
 }
