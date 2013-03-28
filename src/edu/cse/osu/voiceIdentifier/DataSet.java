@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -23,6 +24,14 @@ public class DataSet implements Iterable<DataPoint> {
 
     public DataPoint get(int index) {
         return mPoints.get(index);
+    }
+
+    public void add(DataPoint point) {
+        mPoints.add(point);
+    }
+
+    public void addAll(Collection<DataPoint> points) {
+        mPoints.addAll(points);
     }
 
     public int size() {

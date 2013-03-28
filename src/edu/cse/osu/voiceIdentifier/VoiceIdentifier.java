@@ -1,21 +1,13 @@
 package edu.cse.osu.voiceIdentifier;
 
-import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Random;
 
-import javax.swing.JFrame;
-
-import org.jplot2d.element.Annotation;
-import org.jplot2d.element.Axis;
-import org.jplot2d.element.ElementFactory;
-import org.jplot2d.element.Layer;
-import org.jplot2d.element.Plot;
-import org.jplot2d.element.Title;
-import org.jplot2d.element.XYGraph;
-import org.jplot2d.sizing.AutoPackSizeMode;
-import org.jplot2d.swing.JPlot2DFrame;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.functions.SMO;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils.DataSource;
 
 public class VoiceIdentifier {
 
@@ -43,113 +35,77 @@ public class VoiceIdentifier {
         pointList.add(new DataPoint(sample4.getFeatures(), 1));
         pointList.add(new DataPoint(sample5.getFeatures(), 1));
 
-        DataSet data = new DataSet(pointList);
-
-        data.exportDataFileWeka(new File("data/wekatest.arff"));
-
         System.out.println(sample5.length());
 
-        DataSet splitData = new DataSet(sample5.splitToDataPoints(10.0, 0));
+        DataSet splitData1 = new DataSet(sample5.splitToDataPoints(3.0, 1));
+        DataSet splitData2 = new DataSet(sample3.splitToDataPoints(3.0, 0));
 
-        plotGraph(x, data.getRawData());
+        Grapher.plotGraph(x, splitData1.getRawData());
+        Grapher.plotGraph(x, splitData2.getRawData());
 
-        plotGraph(x, splitData.getRawData());
+        DataSet testSet = new DataSet(sample5.splitToDataPoints(3.0, 1));
+        testSet.addAll(sample3.splitToDataPoints(3.0, 0));
 
-    }
+        testSet.exportDataFileWeka(new File("data/wekatest.arff"));
 
-    /**
-     * Plot a graph of the data provided
-     *
-     * @param x
-     * @param y
-     */
-    public static void plotGraph(double[] x, double[] y) {
+        // load file into WEKA
 
-        ElementFactory ef = ElementFactory.getInstance();
-        Plot plot = ef.createPlot();
-        plot.setPreferredContentSize(800, 600);
-        plot.setSizeMode(new AutoPackSizeMode());
+        try {
 
-        Title title = ef.createTitle("Intensity vs. Frequency");
-        title.setFontScale(2);
-        plot.addTitle(title);
+            DataSource source = new DataSource("data/wekatest.arff");
 
-        Axis xAxis = ef.createAxis();
-        Axis yAxis = ef.createAxis();
+            Classifier svm = new SMO();
 
-        plot.addXAxis(xAxis);
-        plot.addYAxis(yAxis);
+            Evaluation eval = trainClassifier(source, svm, "");
+            testClassifier(source, svm, eval);
 
-        Layer layer = ef.createLayer();
+            svm = new SMO();
 
-        XYGraph graph = ef.createXYGraph(x, y);
+            eval = trainClassifier(source, svm, "-R -C 10000");
+            testClassifier(source, svm, eval);
 
-        layer.addGraph(graph);
+            System.out.println(eval.errorRate());
+            System.out.println(eval.correct());
 
-        plot.addLayer(layer, xAxis.getTickManager().getAxisTransform(), yAxis
-                .getTickManager().getAxisTransform());
-
-        JFrame frame = new JPlot2DFrame(plot);
-        frame.setSize(800, 600);
-        frame.setVisible(true);
-
-    }
-
-    /**
-     * Plot a graph of the data provided with multiple lines
-     *
-     * @param x
-     * @param y
-     */
-    public static void plotGraph(double[] x, double[][] y) {
-
-        ElementFactory ef = ElementFactory.getInstance();
-        Plot plot = ef.createPlot();
-        plot.setPreferredContentSize(800, 600);
-        plot.setSizeMode(new AutoPackSizeMode());
-
-        Title title = ef.createTitle("Intensity vs. Frequency");
-        title.setFontScale(2);
-        plot.addTitle(title);
-
-        Axis xAxis = ef.createAxis();
-        Axis yAxis = ef.createAxis();
-
-        plot.addXAxis(xAxis);
-        plot.addYAxis(yAxis);
-
-        int i = 0;
-        for (double[] row : y) {
-
-            Layer layer = ef.createLayer();
-
-            Random rand = new Random(System.currentTimeMillis());
-
-            XYGraph graph = ef.createXYGraph(x, row);
-
-            Color c = new Color(rand.nextInt(150), rand.nextInt(120),
-                    rand.nextInt(120));
-
-            graph.setColor(c);
-
-            layer.addGraph(graph);
-            plot.addLayer(layer, xAxis.getTickManager().getAxisTransform(),
-                    yAxis.getTickManager().getAxisTransform());
-
-            Annotation ann = ef
-                    .createSymbolAnnotation(x[255], row[255], i + "");
-            ann.setColor(c);
-            ann.setFontSize(30);
-            layer.addAnnotation(ann);
-
-            i++;
-
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        JFrame frame = new JPlot2DFrame(plot);
-        frame.setSize(800, 600);
-        frame.setVisible(true);
 
     }
+
+    public static Evaluation trainClassifier(DataSource trainSource,
+            Classifier cls,
+            String options) throws Exception {
+
+        String[] optionsArray = weka.core.Utils.splitOptions(options);
+
+        Instances data = trainSource.getDataSet();
+
+        if (data.classIndex() == -1)
+            data.setClassIndex(data.numAttributes() - 1);
+
+        cls.setOptions(optionsArray);
+        cls.buildClassifier(data);
+
+        return new Evaluation(data);
+
+    }
+
+    public static void testClassifier(DataSource testSource, Classifier cls,
+            Evaluation eval) throws Exception {
+
+        Instances testData = testSource.getDataSet();
+
+        if (testData.classIndex() == -1)
+            testData.setClassIndex(testData.numAttributes() - 1);
+
+        eval.evaluateModel(cls, testData);
+        System.out.println(eval.toSummaryString("\nResults\n======\n", false));
+
+    }
+
+
+
 
 }
