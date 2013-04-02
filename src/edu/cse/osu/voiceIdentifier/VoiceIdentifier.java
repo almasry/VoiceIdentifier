@@ -1,7 +1,6 @@
 package edu.cse.osu.voiceIdentifier;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -21,30 +20,23 @@ public class VoiceIdentifier {
             x[i] = i;
         }
 
-        AudioSample sample1 = new AudioSample(dataPath + "sample-ben1.wav");
-        AudioSample sample2 = new AudioSample(dataPath + "sample-ben2.wav");
-        AudioSample sample3 = new AudioSample(dataPath + "ben-long.wav");
-        AudioSample sample4 = new AudioSample(dataPath + "sample-david.wav");
-        AudioSample sample5 = new AudioSample(dataPath + "david-long.wav");
+        DataSet testSet = new DataSet();
 
-        ArrayList<DataPoint> pointList = new ArrayList<DataPoint>();
+        for (int n = 1; n < 10; n++) {
+            AudioSample ben = new AudioSample(dataPath + "ben/ben-" + n
+                    + ".wav");
+            testSet.addAll(ben.splitToDataPoints(30.0, 0));
+        }
 
-        pointList.add(new DataPoint(sample1.getFeatures(), 0));
-        pointList.add(new DataPoint(sample2.getFeatures(), 0));
-        pointList.add(new DataPoint(sample3.getFeatures(), 0));
-        pointList.add(new DataPoint(sample4.getFeatures(), 1));
-        pointList.add(new DataPoint(sample5.getFeatures(), 1));
 
-        System.out.println(sample5.length());
+        for (int n = 1; n < 10; n++) {
+            AudioSample david = new AudioSample(dataPath + "david/david-" + n
+                    + ".wav");
+            testSet.addAll(david.splitToDataPoints(30.0, 1));
+        }
 
-        DataSet splitData1 = new DataSet(sample5.splitToDataPoints(3.0, 1));
-        DataSet splitData2 = new DataSet(sample3.splitToDataPoints(3.0, 0));
 
-        Grapher.plotGraph(x, splitData1.getRawData());
-        Grapher.plotGraph(x, splitData2.getRawData());
-
-        DataSet testSet = new DataSet(sample5.splitToDataPoints(3.0, 1));
-        testSet.addAll(sample3.splitToDataPoints(3.0, 0));
+        Grapher.plotGraph(x, testSet.getRawData());
 
         testSet.exportDataFileWeka(new File("data/wekatest.arff"));
 
@@ -71,12 +63,10 @@ public class VoiceIdentifier {
             e.printStackTrace();
         }
 
-
     }
 
     public static Evaluation trainClassifier(DataSource trainSource,
-            Classifier cls,
-            String options) throws Exception {
+            Classifier cls, String options) throws Exception {
 
         String[] optionsArray = weka.core.Utils.splitOptions(options);
 
@@ -104,8 +94,5 @@ public class VoiceIdentifier {
         System.out.println(eval.toSummaryString("\nResults\n======\n", false));
 
     }
-
-
-
 
 }

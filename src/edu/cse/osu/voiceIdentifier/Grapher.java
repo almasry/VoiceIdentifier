@@ -1,7 +1,6 @@
 package edu.cse.osu.voiceIdentifier;
 
 import java.awt.Color;
-import java.util.Random;
 
 import javax.swing.JFrame;
 
@@ -19,7 +18,7 @@ public class Grapher {
 
     /**
      * Plot a graph of the data provided
-     * 
+     *
      * @param x
      * @param y
      */
@@ -57,7 +56,7 @@ public class Grapher {
 
     /**
      * Plot a graph of the data provided with multiple lines
-     * 
+     *
      * @param x
      * @param y
      */
@@ -83,12 +82,24 @@ public class Grapher {
 
             Layer layer = ef.createLayer();
 
-            Random rand = new Random(System.currentTimeMillis());
-
             XYGraph graph = ef.createXYGraph(x, row);
 
-            Color c = new Color(rand.nextInt(150), rand.nextInt(120),
-                    rand.nextInt(120));
+            /**
+             * Random rand = new Random(System.currentTimeMillis()); Color c =
+             * new Color(rand.nextInt(150), rand.nextInt(120),
+             * rand.nextInt(120));
+             **/
+
+            // TODO write a new function to graph a dataset with each class as a
+            // color
+
+            Color c;
+
+            if (i < y.length / 2) {
+                c = Color.RED;
+            } else {
+                c = Color.BLUE;
+            }
 
             graph.setColor(c);
 
