@@ -1,6 +1,7 @@
 package edu.cse.osu.voiceIdentifier;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -20,41 +21,49 @@ public class VoiceIdentifier {
             x[i] = i;
         }
 
-        DataSet testSet = new DataSet();
+        DataSet data = new DataSet();
+
+        // AudioSample ben = new AudioSample(dataPath + "ben/ben-full.wav");
+        // data.addAll(ben.splitToDataPoints(5.0, 0));
 
         for (int n = 1; n < 10; n++) {
             AudioSample ben = new AudioSample(dataPath + "ben/ben-" + n
                     + ".wav");
-            testSet.addAll(ben.splitToDataPoints(30.0, 0));
+            data.addAll(ben.splitToDataPoints(2.0, 0));
         }
-
 
         for (int n = 1; n < 10; n++) {
             AudioSample david = new AudioSample(dataPath + "david/david-" + n
                     + ".wav");
-            testSet.addAll(david.splitToDataPoints(30.0, 1));
+            data.addAll(david.splitToDataPoints(2.0, 1));
         }
 
+        Grapher.plotGraph(x, data.getRawData());
 
-        Grapher.plotGraph(x, testSet.getRawData());
+        ArrayList<DataSet> pair = data.splitToTrainingTestPair(0.75);
 
-        testSet.exportDataFileWeka(new File("data/wekatest.arff"));
+        pair.get(0).exportDataFileWeka(new File("data/training.arff"));
+        pair.get(1).exportDataFileWeka(new File("data/test.arff"));
 
         // load file into WEKA
 
         try {
 
-            DataSource source = new DataSource("data/wekatest.arff");
+            DataSource training = new DataSource("data/training.arff");
+            DataSource test = new DataSource("data/test.arff");
 
             Classifier svm = new SMO();
 
-            Evaluation eval = trainClassifier(source, svm, "");
-            testClassifier(source, svm, eval);
+            Evaluation eval = trainClassifier(training, svm, "");
+            testClassifier(test, svm, eval);
+
+            System.out.println(eval.errorRate());
+            System.out.println(eval.correct());
 
             svm = new SMO();
 
-            eval = trainClassifier(source, svm, "-R -C 10000");
-            testClassifier(source, svm, eval);
+            eval = trainClassifier(training, svm, "-R -C 10000");
+            testClassifier(test, svm, eval);
 
             System.out.println(eval.errorRate());
             System.out.println(eval.correct());

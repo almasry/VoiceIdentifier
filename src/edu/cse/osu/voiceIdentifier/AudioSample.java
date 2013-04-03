@@ -79,7 +79,7 @@ public class AudioSample {
 
     /**
      * Returns a list of samples split into samples of the provided length
-     * 
+     *
      * @param sampleLengthSeconds
      * @return
      */
@@ -109,14 +109,18 @@ public class AudioSample {
     ArrayList<DataPoint> splitToDataPoints(double sampleLengthSeconds,
             int classLabel) {
 
-        ArrayList<DataPoint> points = new ArrayList<DataPoint>();
-        ArrayList<AudioSample> split = split(sampleLengthSeconds);
+        ArrayList<DataPoint> output = new ArrayList<DataPoint>();
 
-        for (AudioSample sample : split) {
-            points.add(new DataPoint(sample.getFeatures(), classLabel));
+        int numberSamples = (int) Math.floor(mWave.length()
+                / sampleLengthSeconds);
+
+        for (int i = 0; i < numberSamples; i++) {
+            AudioSample clip = getSubSample(i * sampleLengthSeconds, (i + 1)
+                    * sampleLengthSeconds);
+            output.add(new DataPoint(clip.getFeatures(), classLabel));
         }
 
-        return points;
+        return output;
 
     }
 
@@ -128,6 +132,5 @@ public class AudioSample {
     public double length() {
         return mWave.length();
     }
-
 
 }

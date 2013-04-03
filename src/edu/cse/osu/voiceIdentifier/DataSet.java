@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
 
 public class DataSet implements Iterable<DataPoint> {
@@ -112,6 +113,29 @@ public class DataSet implements Iterable<DataPoint> {
         }
 
         return output;
+    }
+
+    public ArrayList<DataSet> splitToTrainingTestPair(double ratio) {
+
+        ArrayList<DataSet> output = new ArrayList<DataSet>();
+        Random rand = new Random(System.currentTimeMillis());
+
+        DataSet training = new DataSet();
+        DataSet test = new DataSet();
+
+        for (DataPoint point : mPoints) {
+            if (rand.nextDouble() > ratio) {
+                test.add(point);
+            } else {
+                training.add(point);
+            }
+        }
+
+        output.add(training);
+        output.add(test);
+
+        return output;
+
     }
 
 }
