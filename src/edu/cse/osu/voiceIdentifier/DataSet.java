@@ -14,12 +14,15 @@ import java.util.Set;
 public class DataSet implements Iterable<DataPoint> {
 
     private final ArrayList<DataPoint> mPoints;
+    private final int mNumClasses;
 
-    public DataSet() {
+    public DataSet(int numClasses) {
+        mNumClasses = numClasses;
         mPoints = new ArrayList<DataPoint>();
     }
 
-    public DataSet(ArrayList<DataPoint> pointList) {
+    public DataSet(ArrayList<DataPoint> pointList, int numClasses) {
+        mNumClasses = numClasses;
         mPoints = pointList;
     }
 
@@ -108,8 +111,8 @@ public class DataSet implements Iterable<DataPoint> {
     public Set<Integer> getAllClassLabels() {
         HashSet<Integer> output = new HashSet<Integer>();
 
-        for (DataPoint p : mPoints) {
-            output.add(p.getclassLabel());
+        for (int i = 0; i < mNumClasses; i++) {
+            output.add(i);
         }
 
         return output;
@@ -120,8 +123,8 @@ public class DataSet implements Iterable<DataPoint> {
         ArrayList<DataSet> output = new ArrayList<DataSet>();
         Random rand = new Random(System.currentTimeMillis());
 
-        DataSet training = new DataSet();
-        DataSet test = new DataSet();
+        DataSet training = new DataSet(mNumClasses);
+        DataSet test = new DataSet(mNumClasses);
 
         for (DataPoint point : mPoints) {
             if (rand.nextDouble() > ratio) {

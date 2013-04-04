@@ -95,10 +95,12 @@ public class Grapher {
 
             Color c;
 
-            if (i < y.length / 2) {
-                c = Color.RED;
-            } else {
+            if (i < y.length / 3) {
+                c = Color.GREEN;
+            } else if (i < 2 * y.length / 3) {
                 c = Color.BLUE;
+            } else {
+                c = Color.RED;
             }
 
             graph.setColor(c);
