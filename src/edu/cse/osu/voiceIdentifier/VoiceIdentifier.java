@@ -26,9 +26,9 @@ public class VoiceIdentifier {
 
     public static void main(String[] args) {
 
-        // graphComparison(args[0]);
-        // generateClassifiers(args[0]);
-        liveDemo(args[0], 10);
+        graphComparison(args[0]);
+        // generateClassifiers(args[0], 10.0);
+        // liveDemo(args[0], 10);
     }
 
     public static Evaluation trainClassifier(DataSource trainSource,
@@ -61,7 +61,7 @@ public class VoiceIdentifier {
 
     }
 
-    public static void generateClassifiers(String dataPath) {
+    public static void generateClassifiers(String dataPath, double sampleLength) {
 
         DataSet data = new DataSet(3);
 
@@ -71,19 +71,19 @@ public class VoiceIdentifier {
         for (int n = 1; n < 10; n++) {
             AudioSample ben = new AudioSample(dataPath + "ben/ben-" + n
                     + ".wav");
-            data.addAll(ben.splitToDataPoints(10.0, 0));
+            data.addAll(ben.splitToDataPoints(sampleLength, 0));
         }
 
         for (int n = 1; n < 10; n++) {
             AudioSample david = new AudioSample(dataPath + "david/david-" + n
                     + ".wav");
-            data.addAll(david.splitToDataPoints(10.0, 1));
+            data.addAll(david.splitToDataPoints(sampleLength, 1));
         }
 
-        for (int n = 1; n < 10; n++) {
+        for (int n = 1; n < 20; n++) {
             AudioSample nicole = new AudioSample(dataPath + "nicole/nicole-"
                     + n + ".wav");
-            data.addAll(nicole.splitToDataPoints(10.0, 2));
+            data.addAll(nicole.splitToDataPoints(sampleLength, 2));
         }
 
         System.out.println("Total size of dataset: " + data.size());
@@ -142,13 +142,13 @@ public class VoiceIdentifier {
             data.add(new DataPoint(david.getFeatures(), 1));
         }
 
-        for (int n = 1; n < 10; n++) {
+        for (int n = 1; n < 19; n++) {
             AudioSample nicole = new AudioSample(dataPath + "nicole/nicole-"
                     + n + ".wav");
             data.add(new DataPoint(nicole.getFeatures(), 2));
         }
 
-        Grapher.plotGraph(x, data.getRawData());
+        Grapher.plotDataSet(x, data);
 
     }
 

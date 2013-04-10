@@ -1,6 +1,7 @@
 package edu.cse.osu.voiceIdentifier;
 
 import java.awt.Color;
+import java.util.Random;
 
 import javax.swing.JFrame;
 
@@ -84,20 +85,61 @@ public class Grapher {
 
             XYGraph graph = ef.createXYGraph(x, row);
 
-            /**
-             * Random rand = new Random(System.currentTimeMillis()); Color c =
-             * new Color(rand.nextInt(150), rand.nextInt(120),
-             * rand.nextInt(120));
-             **/
+            Random rand = new Random(System.currentTimeMillis());
+            Color c = new Color(rand.nextInt(150), rand.nextInt(120),
+                    rand.nextInt(120));
 
-            // TODO write a new function to graph a dataset with each class as a
-            // color
+            graph.setColor(c);
+
+            layer.addGraph(graph);
+            plot.addLayer(layer, xAxis.getTickManager().getAxisTransform(),
+                    yAxis.getTickManager().getAxisTransform());
+
+            Annotation ann = ef
+                    .createSymbolAnnotation(x[255], row[255], i + "");
+            ann.setColor(c);
+            ann.setFontSize(30);
+            layer.addAnnotation(ann);
+
+            i++;
+
+        }
+
+        JFrame frame = new JPlot2DFrame(plot);
+        frame.setSize(800, 600);
+        frame.setVisible(true);
+
+    }
+
+    public static void plotDataSet(double[] x, DataSet data) {
+
+        ElementFactory ef = ElementFactory.getInstance();
+        Plot plot = ef.createPlot();
+        plot.setPreferredContentSize(800, 600);
+        plot.setSizeMode(new AutoPackSizeMode());
+
+        Title title = ef.createTitle("Intensity vs. Frequency");
+        title.setFontScale(2);
+        plot.addTitle(title);
+
+        Axis xAxis = ef.createAxis();
+        Axis yAxis = ef.createAxis();
+
+        plot.addXAxis(xAxis);
+        plot.addYAxis(yAxis);
+
+        int i = 0;
+        for (DataPoint point : data) {
+
+            Layer layer = ef.createLayer();
+
+            XYGraph graph = ef.createXYGraph(x, point.getValueArray());
 
             Color c;
 
-            if (i < y.length / 3) {
+            if (point.getclassLabel() == 0) {
                 c = Color.GREEN;
-            } else if (i < 2 * y.length / 3) {
+            } else if (point.getclassLabel() == 1) {
                 c = Color.BLUE;
             } else {
                 c = Color.RED;
@@ -109,8 +151,8 @@ public class Grapher {
             plot.addLayer(layer, xAxis.getTickManager().getAxisTransform(),
                     yAxis.getTickManager().getAxisTransform());
 
-            Annotation ann = ef
-                    .createSymbolAnnotation(x[255], row[255], i + "");
+            Annotation ann = ef.createSymbolAnnotation(x[255],
+                    point.getValueArray()[255], i + "");
             ann.setColor(c);
             ann.setFontSize(30);
             layer.addAnnotation(ann);
