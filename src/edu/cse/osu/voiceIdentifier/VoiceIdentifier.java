@@ -27,9 +27,34 @@ public class VoiceIdentifier {
 
     public static void main(String[] args) {
 
-        graphComparison(args[0]);
-        // generateClassifiers(args[0], 10.0);
-        // liveDemo(args[0], 10);
+        BufferedReader input = new BufferedReader(new InputStreamReader(
+                System.in));
+        System.out.println("Select program mode");
+        System.out.println("0 : Compare graphs of the data");
+        System.out
+                .println("1 : Generate training/test set and compare classifiers");
+        System.out.println("2 : Live Demo");
+
+        int mode = 0;
+        try {
+            mode = Integer.parseInt(input.readLine());
+            switch (mode) {
+            case 0:
+                graphComparison(args[0]);
+                break;
+            case 1:
+                generateClassifiers(args[0], 10);
+                break;
+            case 2:
+                liveDemo(args[0], 10);
+                break;
+            default:
+                System.exit(0);
+            }
+        } catch (Exception e) {
+            System.exit(0);
+        }
+
     }
 
     public static Evaluation trainClassifier(DataSource trainSource,
@@ -66,9 +91,6 @@ public class VoiceIdentifier {
 
         DataSet data = new DataSet(3);
 
-        // AudioSample ben = new AudioSample(dataPath + "ben/ben-full.wav");
-        // data.addAll(ben.splitToDataPoints(5.0, 0));
-
         for (int n = 1; n < 10; n++) {
             AudioSample ben = new AudioSample(dataPath + "ben/ben-" + n
                     + ".wav");
@@ -81,7 +103,7 @@ public class VoiceIdentifier {
             data.addAll(david.splitToDataPoints(sampleLength, 1));
         }
 
-        for (int n = 1; n < 20; n++) {
+        for (int n = 1; n < 19; n++) {
             AudioSample nicole = new AudioSample(dataPath + "nicole/nicole-"
                     + n + ".wav");
             data.addAll(nicole.splitToDataPoints(sampleLength, 2));
@@ -97,6 +119,7 @@ public class VoiceIdentifier {
         // load file into WEKA
 
         try {
+
             // SVM
             System.out.println("Support Vector Machine");
             DataSource training = new DataSource("data/training.arff");
@@ -107,35 +130,24 @@ public class VoiceIdentifier {
             Evaluation eval = trainClassifier(training, svm, "");
             testClassifier(test, svm, eval);
 
-            System.out.println(eval.errorRate());
-            System.out.println(eval.correct());
-
             svm = new SMO();
 
             eval = trainClassifier(training, svm, "-R -C 10000");
             testClassifier(test, svm, eval);
 
-            System.out.println(eval.errorRate());
-            System.out.println(eval.correct());
-            
             // NN
             System.out.println("Neural Network / Perceptron");
 
             Classifier nn = new MultilayerPerceptron();
 
-            Evaluation evalNN = trainClassifier(training, nn, "");
-            testClassifier(test, nn, evalNN);
-
-            System.out.println(evalNN.errorRate());
-            System.out.println(evalNN.correct());
+            eval = trainClassifier(training, nn, "-L 0.1 -N 2");
+            testClassifier(test, nn, eval);
 
             nn = new MultilayerPerceptron();
 
-            evalNN = trainClassifier(training, nn, "");
-            testClassifier(test, nn, evalNN);
+            eval = trainClassifier(training, nn, "-L 0.5 -N 20");
+            testClassifier(test, nn, eval);
 
-            System.out.println(evalNN.errorRate());
-            System.out.println(evalNN.correct());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -180,16 +192,17 @@ public class VoiceIdentifier {
         Classifier svm, nn;
         Evaluation evalSVM, evalNN;
         try {
+
             training = new DataSource("data/training.arff");
-            
+
             System.out.println("Training SVM, please wait..");
             svm = new SMO();
             evalSVM = trainClassifier(training, svm, "");
             System.out.println("SVM Training Complete.");
-            
+
             System.out.println("Training NN, please wait..");
             nn = new MultilayerPerceptron();
-            evalNN = trainClassifier(training, nn, "");
+            evalNN = trainClassifier(training, nn, "-L 0.5 -N 20");
             System.out.println("NN Training Complete.");
 
             // record a sample from the microphone
@@ -197,6 +210,10 @@ public class VoiceIdentifier {
             BufferedReader input = new BufferedReader(new InputStreamReader(
                     System.in));
             System.out.println("Enter the class label of the person speaking");
+            System.out.println("0 : Ben");
+            System.out.println("1 : David");
+            System.out.println("2 : Nicole");
+            System.out.println("3 : Ethan");
             System.out.println("Press Enter to begin recording");
 
             int classLabel = 0;
@@ -236,11 +253,13 @@ public class VoiceIdentifier {
                 while ((System.currentTimeMillis() - startTime) <= durationInSeconds * 1000) {
                     numBytesRead = line.read(data, 0, data.length);
                     out.write(data, 0, numBytesRead);
-                    if ((percentDone < (System.currentTimeMillis() - startTime) / (durationInSeconds * 10)) && (percentDone % 20 == 0))
-                    {
+                    if ((percentDone < (System.currentTimeMillis() - startTime)
+                            / (durationInSeconds * 10))
+                            && (percentDone % 20 == 0)) {
                         System.out.print(" " + percentDone + "%");
                     }
-                    percentDone = (System.currentTimeMillis() - startTime) / (durationInSeconds * 10);
+                    percentDone = (System.currentTimeMillis() - startTime)
+                            / (durationInSeconds * 10);
                 }
                 System.out.println();
                 out.close();
@@ -281,7 +300,7 @@ public class VoiceIdentifier {
 
             System.out.println("SVM Results..");
             testClassifier(new DataSource("data/temp.arff"), svm, evalSVM);
-            
+
             System.out.println("NN Results..");
             testClassifier(new DataSource("data/temp.arff"), nn, evalNN);
 
