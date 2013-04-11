@@ -89,7 +89,7 @@ public class VoiceIdentifier {
 
     public static void generateClassifiers(String dataPath, double sampleLength) {
 
-        DataSet data = new DataSet(3);
+        DataSet data = new DataSet(4);
 
         for (int n = 1; n < 10; n++) {
             AudioSample ben = new AudioSample(dataPath + "ben/ben-" + n
@@ -97,7 +97,7 @@ public class VoiceIdentifier {
             data.addAll(ben.splitToDataPoints(sampleLength, 0));
         }
 
-        for (int n = 1; n < 10; n++) {
+        for (int n = 1; n < 19; n++) {
             AudioSample david = new AudioSample(dataPath + "david/david-" + n
                     + ".wav");
             data.addAll(david.splitToDataPoints(sampleLength, 1));
@@ -107,6 +107,12 @@ public class VoiceIdentifier {
             AudioSample nicole = new AudioSample(dataPath + "nicole/nicole-"
                     + n + ".wav");
             data.addAll(nicole.splitToDataPoints(sampleLength, 2));
+        }
+
+        for (int n = 1; n < 19; n++) {
+            AudioSample ethan = new AudioSample(dataPath + "ethan/ethan-" + n
+                    + ".wav");
+            data.add(new DataPoint(ethan.getFeatures(), 3));
         }
 
         System.out.println("Total size of dataset: " + data.size());
@@ -132,7 +138,7 @@ public class VoiceIdentifier {
 
             svm = new SMO();
 
-            eval = trainClassifier(training, svm, "-R -C 10000");
+            eval = trainClassifier(training, svm, "-R");
             testClassifier(test, svm, eval);
 
             // NN
@@ -160,7 +166,7 @@ public class VoiceIdentifier {
             x[i] = i;
         }
 
-        DataSet data = new DataSet(3);
+        DataSet data = new DataSet(4);
 
         for (int n = 1; n < 10; n++) {
             AudioSample ben = new AudioSample(dataPath + "ben/ben-" + n
@@ -168,7 +174,7 @@ public class VoiceIdentifier {
             data.add(new DataPoint(ben.getFeatures(), 0));
         }
 
-        for (int n = 1; n < 10; n++) {
+        for (int n = 1; n < 19; n++) {
             AudioSample david = new AudioSample(dataPath + "david/david-" + n
                     + ".wav");
             data.add(new DataPoint(david.getFeatures(), 1));
@@ -178,6 +184,12 @@ public class VoiceIdentifier {
             AudioSample nicole = new AudioSample(dataPath + "nicole/nicole-"
                     + n + ".wav");
             data.add(new DataPoint(nicole.getFeatures(), 2));
+        }
+
+        for (int n = 1; n < 19; n++) {
+            AudioSample ethan = new AudioSample(dataPath + "ethan/ethan-" + n
+                    + ".wav");
+            data.add(new DataPoint(ethan.getFeatures(), 3));
         }
 
         Grapher.plotDataSet(x, data);
@@ -293,7 +305,7 @@ public class VoiceIdentifier {
 
                     // Create a new test dataset to evaluate the file
                     AudioSample recordedClip = new AudioSample("data/temp.wav");
-                    DataSet recorded = new DataSet(3);
+                    DataSet recorded = new DataSet(4);
                     recorded.add(new DataPoint(recordedClip.getFeatures(),
                             classLabel));
                     recorded.exportDataFileWeka(new File("data/temp.arff"));

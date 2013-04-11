@@ -141,21 +141,19 @@ public class Grapher {
                 c = Color.GREEN;
             } else if (point.getclassLabel() == 1) {
                 c = Color.BLUE;
-            } else {
+            } else if (point.getclassLabel() == 2) {
                 c = Color.RED;
+            } else {
+                c = Color.ORANGE;
             }
+
+            c = new Color(c.getRed(), c.getGreen(), c.getBlue(), 200);
 
             graph.setColor(c);
 
             layer.addGraph(graph);
             plot.addLayer(layer, xAxis.getTickManager().getAxisTransform(),
                     yAxis.getTickManager().getAxisTransform());
-
-            Annotation ann = ef.createSymbolAnnotation(x[255],
-                    point.getValueArray()[255], i + "");
-            ann.setColor(c);
-            ann.setFontSize(30);
-            layer.addAnnotation(ann);
 
             i++;
 
