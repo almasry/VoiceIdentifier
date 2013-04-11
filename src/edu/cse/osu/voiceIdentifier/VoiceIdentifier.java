@@ -207,21 +207,7 @@ public class VoiceIdentifier {
 
             // record a sample from the microphone
 
-            BufferedReader input = new BufferedReader(new InputStreamReader(
-                    System.in));
-            System.out.println("Enter the class label of the person speaking");
-            System.out.println("0 : Ben");
-            System.out.println("1 : David");
-            System.out.println("2 : Nicole");
-            System.out.println("3 : Ethan");
-            System.out.println("Press Enter to begin recording");
-
-            int classLabel = 0;
-            try {
-                classLabel = Integer.parseInt(input.readLine());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            // set up the line in
 
             AudioFormat format = new AudioFormat(
                     AudioFormat.Encoding.PCM_SIGNED, 44100.0F, 16, 2, 4,
@@ -234,75 +220,100 @@ public class VoiceIdentifier {
             }
 
             try {
-
                 line = (TargetDataLine) AudioSystem.getLine(info);
                 line.open(format);
 
-                line.start();
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                int numBytesRead;
-                byte[] data = new byte[line.getBufferSize() / 5];
+                while (true) {
 
-                System.out.println("Recording Started");
+                    BufferedReader input = new BufferedReader(
+                            new InputStreamReader(System.in));
+                    System.out
+                            .println("Enter the class label of the person speaking");
+                    System.out.println("0 : Ben");
+                    System.out.println("1 : David");
+                    System.out.println("2 : Nicole");
+                    System.out.println("3 : Ethan");
+                    System.out.println("Press Enter to begin recording");
 
-                line.start();
-
-                long startTime = System.currentTimeMillis();
-
-                long percentDone = 0;
-                while ((System.currentTimeMillis() - startTime) <= durationInSeconds * 1000) {
-                    numBytesRead = line.read(data, 0, data.length);
-                    out.write(data, 0, numBytesRead);
-                    if ((percentDone < (System.currentTimeMillis() - startTime)
-                            / (durationInSeconds * 10))
-                            && (percentDone % 20 == 0)) {
-                        System.out.print(" " + percentDone + "%");
+                    int classLabel = 0;
+                    try {
+                        classLabel = Integer.parseInt(input.readLine());
+                    } catch (Exception e) {
+                        System.exit(0);
                     }
-                    percentDone = (System.currentTimeMillis() - startTime)
-                            / (durationInSeconds * 10);
+
+                    try {
+
+                        line.start();
+                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+                        int numBytesRead;
+                        byte[] data = new byte[line.getBufferSize() / 5];
+
+                        System.out.println("Recording Started");
+
+                        line.start();
+
+                        long startTime = System.currentTimeMillis();
+
+                        long percentDone = 0;
+                        while ((System.currentTimeMillis() - startTime) <= durationInSeconds * 1000) {
+                            numBytesRead = line.read(data, 0, data.length);
+                            out.write(data, 0, numBytesRead);
+                            if ((percentDone < (System.currentTimeMillis() - startTime)
+                                    / (durationInSeconds * 10))
+                                    && (percentDone % 20 == 0)) {
+                                System.out.print(" " + percentDone + "%");
+                            }
+                            percentDone = (System.currentTimeMillis() - startTime)
+                                    / (durationInSeconds * 10);
+                        }
+                        System.out.println();
+                        out.close();
+                        System.out.println("Recording Completed");
+
+                        ByteArrayInputStream bais = new ByteArrayInputStream(
+                                out.toByteArray());
+                        AudioInputStream ais = new AudioInputStream(bais,
+                                format, out.size());
+
+                        if (AudioSystem.isFileTypeSupported(
+                                AudioFileFormat.Type.WAVE, ais)) {
+                            AudioSystem.write(ais, AudioFileFormat.Type.WAVE,
+                                    new File("data/temp.wav"));
+                        }
+
+                        line.stop();
+                        ais.close();
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    System.out.println("Audio file written");
+
+                    // Create a new test dataset to evaluate the file
+                    AudioSample recordedClip = new AudioSample("data/temp.wav");
+                    DataSet recorded = new DataSet(3);
+                    recorded.add(new DataPoint(recordedClip.getFeatures(),
+                            classLabel));
+                    recorded.exportDataFileWeka(new File("data/temp.arff"));
+
+                    System.out.println("Weka data file written");
+
+                    // Evaluate the results
+
+                    System.out.println("SVM Results..");
+                    testClassifier(new DataSource("data/temp.arff"), svm,
+                            evalSVM);
+
+                    System.out.println("NN Results..");
+                    testClassifier(new DataSource("data/temp.arff"), nn, evalNN);
+
                 }
-                System.out.println();
-                out.close();
-                System.out.println("Recording Completed");
 
-                ByteArrayInputStream bais = new ByteArrayInputStream(
-                        out.toByteArray());
-                AudioInputStream ais = new AudioInputStream(bais, format,
-                        out.size());
-
-                if (AudioSystem.isFileTypeSupported(AudioFileFormat.Type.WAVE,
-                        ais)) {
-                    AudioSystem.write(ais, AudioFileFormat.Type.WAVE, new File(
-                            "data/temp.wav"));
-                }
-
-                line.stop();
-                ais.close();
-
-            } catch (LineUnavailableException ex) {
-                System.err.println("Line not available");
-                System.exit(0);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (LineUnavailableException e1) {
+                e1.printStackTrace();
             }
-
-            System.out.println("Audio file written");
-
-            // Create a new test dataset to evaluate the file
-            AudioSample recordedClip = new AudioSample("data/temp.wav");
-            DataSet recorded = new DataSet(3);
-            recorded.add(new DataPoint(recordedClip.getFeatures(), classLabel));
-            recorded.exportDataFileWeka(new File("data/temp.arff"));
-
-            System.out.println("Weka data file written");
-
-            // Evaluate the results
-
-            System.out.println("SVM Results..");
-            testClassifier(new DataSource("data/temp.arff"), svm, evalSVM);
-
-            System.out.println("NN Results..");
-            testClassifier(new DataSource("data/temp.arff"), nn, evalNN);
 
         } catch (Exception e) {
             e.printStackTrace();
