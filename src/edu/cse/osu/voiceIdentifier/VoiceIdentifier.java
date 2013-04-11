@@ -91,7 +91,7 @@ public class VoiceIdentifier {
 
         DataSet data = new DataSet(4);
 
-        for (int n = 1; n < 10; n++) {
+        for (int n = 1; n < 19; n++) {
             AudioSample ben = new AudioSample(dataPath + "ben/ben-" + n
                     + ".wav");
             data.addAll(ben.splitToDataPoints(sampleLength, 0));
@@ -168,7 +168,7 @@ public class VoiceIdentifier {
 
         DataSet data = new DataSet(4);
 
-        for (int n = 1; n < 10; n++) {
+        for (int n = 1; n < 19; n++) {
             AudioSample ben = new AudioSample(dataPath + "ben/ben-" + n
                     + ".wav");
             data.add(new DataPoint(ben.getFeatures(), 0));
