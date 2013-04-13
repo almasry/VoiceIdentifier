@@ -147,7 +147,7 @@ public class VoiceIdentifier {
 
             CVParameterSelection cv = new CVParameterSelection();
             Evaluation eval = trainClassifier(full, cv,
-                    "-D -X 5 -S 1 -C 1.0 -P \"C 0.0001 100 5\" -P \"E 1 5 5\" -W weka.classifiers.functions.SMO");
+                    "-D -X 5 -S 1 -C 1.0 -P \"C 0.00001 25 5\" -P \"E 1 5 5\" -P \"N 0 2 3\" -W weka.classifiers.functions.SMO");
             System.out.println(cv.toSummaryString());
 
             Classifier svm = new SMO();
