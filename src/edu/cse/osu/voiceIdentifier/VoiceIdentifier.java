@@ -146,7 +146,9 @@ public class VoiceIdentifier {
             // Cross Validation
 
             CVParameterSelection cv = new CVParameterSelection();
-            Evaluation eval = trainClassifier(full, cv,
+            Evaluation eval = trainClassifier(
+                    full,
+                    cv,
                     "-D -X 5 -S 1 -C 1.0 -P \"C 0.00001 25 5\" -P \"E 1 5 5\" -P \"N 0 2 3\" -W weka.classifiers.functions.SMO");
             System.out.println(cv.toSummaryString());
 
@@ -177,7 +179,6 @@ public class VoiceIdentifier {
             e.printStackTrace();
         }
     }
-
 
     public static void graphComparison(String dataPath) {
 
@@ -225,11 +226,14 @@ public class VoiceIdentifier {
         Evaluation evalSVM, evalNN;
         try {
 
-            training = new DataSource("data/training.arff");
+            training = new DataSource("data/full.arff");
 
             System.out.println("Training SVM, please wait..");
             svm = new SMO();
-            evalSVM = trainClassifier(training, svm, "");
+            evalSVM = trainClassifier(
+                    training,
+                    svm,
+                    " -C 6.2500075 -E 1 -N 0 -L 0.0010 -P 1.0E-12 -V -1 -W 1 -K \"weka.classifiers.functions.supportVector.PolyKernel -C 250007 -E 1.0\"");
             System.out.println("SVM Training Complete.");
 
             System.out.println("Training NN, please wait..");
