@@ -20,6 +20,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.MultilayerPerceptron;
 import weka.classifiers.functions.SMO;
+import weka.classifiers.meta.CVParameterSelection;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -31,9 +32,9 @@ public class VoiceIdentifier {
                 System.in));
         System.out.println("Select program mode");
         System.out.println("0 : Compare graphs of the data");
-        System.out
-                .println("1 : Generate training/test set and compare classifiers");
-        System.out.println("2 : Live Demo");
+        System.out.println("1 : Generate training/test set");
+        System.out.println("2 : Compare classifiers");
+        System.out.println("3 : Live Demo");
 
         int mode = 0;
         try {
@@ -43,9 +44,12 @@ public class VoiceIdentifier {
                 graphComparison(args[0]);
                 break;
             case 1:
-                generateClassifiers(args[0], 10);
+                generateWekaFiles(args[0], 10);
                 break;
             case 2:
+                generateClassifiers(args[0]);
+                break;
+            case 3:
                 liveDemo(args[0], 10);
                 break;
             default:
@@ -87,7 +91,7 @@ public class VoiceIdentifier {
 
     }
 
-    public static void generateClassifiers(String dataPath, double sampleLength) {
+    public static void generateWekaFiles(String dataPath, double sampleLength) {
 
         DataSet data = new DataSet(4);
 
@@ -119,8 +123,13 @@ public class VoiceIdentifier {
 
         ArrayList<DataSet> pair = data.splitToTrainingTestPair(0.75);
 
+        data.exportDataFileWeka(new File("data/full.arff"));
         pair.get(0).exportDataFileWeka(new File("data/training.arff"));
         pair.get(1).exportDataFileWeka(new File("data/test.arff"));
+
+    }
+
+    public static void generateClassifiers(String dataPath) {
 
         // load file into WEKA
 
@@ -128,12 +137,22 @@ public class VoiceIdentifier {
 
             // SVM
             System.out.println("Support Vector Machine");
+
             DataSource training = new DataSource("data/training.arff");
             DataSource test = new DataSource("data/test.arff");
 
+            DataSource full = new DataSource("data/full.arff");
+
+            // Cross Validation
+
+            CVParameterSelection cv = new CVParameterSelection();
+            Evaluation eval = trainClassifier(full, cv,
+                    "-D -X 5 -S 1 -C 1.0 -P \"C 0.0001 100 5\" -P \"E 1 5 5\" -W weka.classifiers.functions.SMO");
+            System.out.println(cv.toSummaryString());
+
             Classifier svm = new SMO();
 
-            Evaluation eval = trainClassifier(training, svm, "");
+            eval = trainClassifier(training, svm, "");
             testClassifier(test, svm, eval);
 
             svm = new SMO();
@@ -158,6 +177,7 @@ public class VoiceIdentifier {
             e.printStackTrace();
         }
     }
+
 
     public static void graphComparison(String dataPath) {
 
